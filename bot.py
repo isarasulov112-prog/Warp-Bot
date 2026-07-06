@@ -9,7 +9,7 @@ from telebot import TeleBot, types
 # =====================================================================
 #  1. SƏNİN REAL TOKƏNLƏRİN (AVTOMATİK DAXİL EDİLDİ)
 # =====================================================================
-TG_TOKEN = "7330559550:AAH_A7vN9Dcl_qW4mKq-tq_9z123456789" # Sənin botunun öz API kodu
+TG_TOKEN = "8992833881:AAFyHiWToVXMzq1bvbRxmMfLRTWGjV2Ei8g" # Sənin botunun öz API kodu
 CRYPTO_PAY_TOKEN = "605631:AAqwRzJ5EkaL9ZydJ9dVFBHnDPL1NJXu1Mi" # Şəkildə mənə göstərdiyin Crypto Bot kodu
 
 bot = TeleBot(TG_TOKEN)
