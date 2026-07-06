@@ -7,10 +7,11 @@ from flask import Flask
 from telebot import TeleBot, types
 
 # =====================================================================
-#  1. SƏNİN REAL TOKƏNLƏRİN (AVTOMATİK DAXİL EDİLDİ)
+#  1. SƏNİN REAL TOKƏNLƏRİN
 # =====================================================================
-TG_TOKEN = "8992833881:AAFyHiWToVXMzq1bvbRxmMfLRTWGjV2Ei8g" # Sənin botunun öz API kodu
-CRYPTO_PAY_TOKEN = "605631:AAqwRzJ5EkaL9ZydJ9dVFBHnDPL1NJXu1Mi" # Şəkildə mənə göstərdiyin Crypto Bot kodu
+TG_TOKEN = "7330559550:AAH_A7vN9Dcl_qW4mKq-tq_9wLh_WNo8M"
+# Testnet/Mainnet uyuşmazlığını aradan qaldırmaq üçün API linkini düzəltdik
+CRYPTO_PAY_TOKEN = "605631:AAqwRzJ5EkaL9ZydJ9dVFBHnDPL1NJXu1Mi"
 
 bot = TeleBot(TG_TOKEN)
 DB_NAME = "vpn_business.db"
@@ -25,7 +26,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Bot is running 7/24 securely on Crypto Pay!"
+    return "Bot is running 7/24 securely on Cyber Portal!"
 
 def run_flask():
     port = int(os.environ.get("PORT", 8080))
@@ -86,22 +87,28 @@ def generate_real_warp_config(user_id):
     return config_text
 
 # =====================================================================
-#  5. 💳 CRYPTO BOT ÖDƏNİŞ LİNKİ GENERATORU
+#  5. 💳 CRYPTO BOT ÖDƏNİŞ LİNKİ GENERATORU (Bütün Ünvanlar Üçün)
 # =====================================================================
 def create_crypto_pay_invoice(amount_rub):
-    url = "https://pay.cryptometrika.io/api/createInvoice"
+    # Sənin tokenin testnet olduğu üçün əsas link xəta verirdi, indi hər iki ünvanı yoxlayır:
+    urls = [
+        "https://testnet-pay.cryptometrika.io/api/createInvoice",
+        "https://pay.cryptometrika.io/api/createInvoice"
+    ]
     headers = {"Crypto-Pay-API-Token": CRYPTO_PAY_TOKEN}
     payload = {
         "asset": "RUB",
         "amount": str(amount_rub),
         "description": "Пополнение баланса Cyber Portal VPN"
     }
-    try:
-        res = requests.post(url, json=payload, headers=headers, timeout=8).json()
-        if res.get("ok"):
-            return res["result"]["pay_url"]
-    except Exception:
-        pass
+    
+    for url in urls:
+        try:
+            res = requests.post(url, json=payload, headers=headers, timeout=8).json()
+            if res.get("ok"):
+                return res["result"]["pay_url"]
+        except Exception:
+            continue
     return None
 
 # =====================================================================
@@ -194,7 +201,7 @@ def choose_topup_amount(call):
     btn_back = types.InlineKeyboardButton("⬅️ В кабинет", callback_data="open_cabinet")
     markup.add(btn1, btn2, btn3)
     markup.add(btn_back)
-    bot.edit_message_text("Выберите сумму для мгновенной оплаты через официальный Crypto Bot (Карта / СБП / Баланс):", call.message.chat.id, call.message.message_id, reply_markup=markup)
+    bot.edit_message_text("Выберите сумму для оплаты через Crypto Bot:", call.message.chat.id, call.message.message_id, reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("pay_"))
 def process_payment_link(call):
@@ -203,7 +210,7 @@ def process_payment_link(call):
     pay_url = create_crypto_pay_invoice(amount)
     
     if not pay_url:
-        bot.send_message(call.message.chat.id, "❌ Ошибка при создании счета. Проверьте CRYPTO_PAY_TOKEN.")
+        bot.send_message(call.message.chat.id, "❌ Ошибка при создании счета. Проверьте ваш API-токен в Crypto Bot.")
         return
 
     markup = types.InlineKeyboardMarkup()
@@ -212,7 +219,7 @@ def process_payment_link(call):
     markup.add(btn_pay)
     markup.add(btn_back)
     
-    bot.edit_message_text(f"Ссылка на оплату {amount} рублей создана.\nНажмите на кнопку ниже для мгновенной оплаты через Telegram:", call.message.chat.id, call.message.message_id, reply_markup=markup)
+    bot.edit_message_text(f"Ссылка на оплату {amount} рублей создана.\nНажмите на кнопку ниже для оплаты:", call.message.chat.id, call.message.message_id, reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: call.data == "show_vpn_key")
 def show_vpn_key(call):
@@ -236,7 +243,11 @@ def show_vpn_key(call):
 
     key_delivery_text = (
         f"🔑 **ВАШ НАСТРОЕЧНЫЙ КЛЮЧ VPN**\n\n"
-        f"📋 Нажмите на текст ниже, чтобы автоматически скопировать его, затем вставьте в приложение **WireGuard**:\n\n"
+        f"ℹ️ **ИНСТРУКЦИЯ ДЛЯ БЫСТРОГО ПОДКЛЮЧЕНИЯ:**\n"
+        f"1️⃣ Нажмите на текст ниже (он скопируется автоматически).\n"
+        f"2️⃣ Откройте приложение **WireGuard**.\n"
+        f"3️⃣ Нажмите на кнопку **'+'** (Добавить) и выберите **'Импорт из буфера обмена'** (Add from clipboard).\n"
+        f"4️⃣ Все настроится само за 1 секунду!\n\n"
         f"`{real_config}`"
     )
     bot.edit_message_text(key_delivery_text, call.message.chat.id, call.message.message_id, parse_mode="Markdown", reply_markup=markup)
@@ -251,6 +262,7 @@ def refresh_vpn_key(call):
     
     success_text = (
         f"🔄 **КЛЮЧ УСПЕШНО ОБНОВЛЕН!**\n\n"
+        f"📋 Нажмите для копирования и вставьте через буфер в WireGuard:\n\n"
         f"`{real_config}`"
     )
     bot.edit_message_text(success_text, call.message.chat.id, call.message.message_id, parse_mode="Markdown", reply_markup=markup)
