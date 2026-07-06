@@ -9,7 +9,7 @@ from telebot import TeleBot, types
 # =====================================================================
 #  1. SƏNİN REAL TOKƏNLƏRİN
 # =====================================================================
-TG_TOKEN = "7330559550:AAH_A7vN9Dcl_qW4mKq-tq_9wLh_WNo8M"
+TG_TOKEN = "8992833881:AAFyHiWToVXMzq1bvbRxmMfLRTWGjV2Ei8g"
 # Testnet/Mainnet uyuşmazlığını aradan qaldırmaq üçün API linkini düzəltdik
 CRYPTO_PAY_TOKEN = "605631:AAqwRzJ5EkaL9ZydJ9dVFBHnDPL1NJXu1Mi"
 
